@@ -1,5 +1,6 @@
 package br.com.alura.ecommerce;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -18,7 +19,7 @@ public class NewOrderMain {
         try (KafkaProducer<String, String> producer = new KafkaProducer<>(properties())) {
             String value = "123, 456, 500.00";
             ProducerRecord<String, String> kafkaRecord = new ProducerRecord<>("ECOMMERCE_NEW_ORDER", value, value);
-            producer.send(kafkaRecord, (data, ex) -> {
+            Callback callback = (data, ex) -> {
                 if (ex != null) {
                     ex.printStackTrace();
                     return;
@@ -31,7 +32,12 @@ public class NewOrderMain {
                         data.timestamp());
 
                 LOGGER.info(logMessage);
-            }).get();
+            };
+
+            String email = "Thank you for your order! We are processing your order!";
+            ProducerRecord<String, String> emailRecord = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", email, email);
+            producer.send(kafkaRecord, callback).get();
+            producer.send(emailRecord, callback).get();
         } catch (ExecutionException | InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
