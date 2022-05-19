@@ -4,6 +4,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+
 public class EmailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class.getName());
@@ -11,7 +13,11 @@ public class EmailService {
 
     public static void main(String[] args) {
         EmailService emailService = new EmailService();
-        try (KafkaService kafkaService = new KafkaService(EmailService.class.getSimpleName(), "ECOMMERCE_SEND_EMAIL", emailService::parse)) {
+        try (KafkaService<String> kafkaService = new KafkaService<>(EmailService.class.getSimpleName(),
+                "ECOMMERCE_SEND_EMAIL",
+                emailService::parse,
+                String.class,
+                new HashMap<>())) {
             kafkaService.run();
         }
     }
