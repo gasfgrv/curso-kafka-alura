@@ -1,10 +1,11 @@
 package br.com.alura.ecommerce;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
 
 public class FraudDetectorService {
 
@@ -21,12 +22,29 @@ public class FraudDetectorService {
         }
     }
 
-    private void parse(ConsumerRecord<String, Order> consumerRecord) {
+    private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
+
+    private void parse(ConsumerRecord<String, Order> record) throws ExecutionException, InterruptedException {
+        LOGGER.info("--------------------------------------------");
         LOGGER.info("Processing new order, checking for a fraud");
-        LOGGER.info(consumerRecord.key());
-        LOGGER.info(String.valueOf(consumerRecord.value()));
-        LOGGER.info(String.valueOf(consumerRecord.partition()));
-        LOGGER.info(String.valueOf(consumerRecord.offset()));
+        LOGGER.info(record.key());
+        LOGGER.info(String.valueOf(record.value()));
+        LOGGER.info(String.valueOf(record.partition()));
+        LOGGER.info(String.valueOf(record.offset()));
+
+        Order order = record.value();
+
+        if (isFraud(order)) {
+            LOGGER.warn("Order is a fraud!!!");
+            orderDispatcher.send("ECOMMERCE_ORDER_REJECTED", order.getEmail(), order);
+        } else {
+            LOGGER.info("Aproved: " + order);
+            orderDispatcher.send("ECOMMERCE_ORDER_APROVED", order.getEmail(), order);
+        }
+    }
+
+    private boolean isFraud(Order order) {
+        return order.getAmount().compareTo(new BigDecimal("4500")) >= 0;
     }
 
 }

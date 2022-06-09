@@ -1,12 +1,5 @@
 package br.com.alura.ecommerce;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
@@ -14,6 +7,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KafkaService<T> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaService.class.getName());
@@ -41,9 +40,14 @@ public class KafkaService<T> implements Closeable {
 
             if (!records.isEmpty()) {
                 LOGGER.warn("Foram encontrados " + records.count() + " registros");
+                records.forEach(consumerRecord -> {
+                    try {
+                        parse.consume(consumerRecord);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             }
-
-            records.forEach(consumerRecord -> parse.consume(consumerRecord));
         }
     }
 

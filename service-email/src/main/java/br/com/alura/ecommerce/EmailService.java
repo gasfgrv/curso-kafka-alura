@@ -1,10 +1,9 @@
 package br.com.alura.ecommerce;
 
+import java.util.HashMap;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
 
 public class EmailService {
 
