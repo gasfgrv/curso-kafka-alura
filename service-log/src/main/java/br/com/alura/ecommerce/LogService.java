@@ -23,13 +23,13 @@ public class LogService {
         }
     }
 
-    private void parse(ConsumerRecord<String, String> consumerRecord) {
+    private void parse(ConsumerRecord<String, Message<String>> record) {
         LOGGER.info("------------------------------------------------------");
-        LOGGER.info("Logging: " +  consumerRecord.topic());
-        LOGGER.info(consumerRecord.key());
-        LOGGER.info(consumerRecord.value());
-        LOGGER.info(String.valueOf(consumerRecord.partition()));
-        LOGGER.info(String.valueOf(consumerRecord.offset()));
+        LOGGER.info("Logging: " +  record.topic());
+        LOGGER.info(record.key());
+        LOGGER.info(String.valueOf(record.value()));
+        LOGGER.info(String.valueOf(record.partition()));
+        LOGGER.info(String.valueOf(record.offset()));
     }
 
 }

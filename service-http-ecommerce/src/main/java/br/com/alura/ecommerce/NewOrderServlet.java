@@ -33,10 +33,10 @@ public class NewOrderServlet extends HttpServlet {
             String email = req.getParameter("email");
 
             Order order = new Order(orderId, amount, email);
-            orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, order);
+            orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, new CorrelationId(NewOrderServlet.class.getSimpleName()), order);
 
             String emailCode = "Thank you for your order! We are processing your order!";
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailCode);
+            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, new CorrelationId(NewOrderServlet.class.getSimpleName()),emailCode);
 
             LOGGER.info("New order sent successfully.");
             resp.getWriter().println("New order sent");

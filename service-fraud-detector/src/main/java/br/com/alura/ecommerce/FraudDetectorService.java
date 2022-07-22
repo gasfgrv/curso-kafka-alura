@@ -24,7 +24,7 @@ public class FraudDetectorService {
 
     private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
 
-    private void parse(ConsumerRecord<String, Order> record) throws ExecutionException, InterruptedException {
+    private void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException {
         LOGGER.info("--------------------------------------------");
         LOGGER.info("Processing new order, checking for a fraud");
         LOGGER.info(record.key());
@@ -32,14 +32,15 @@ public class FraudDetectorService {
         LOGGER.info(String.valueOf(record.partition()));
         LOGGER.info(String.valueOf(record.offset()));
 
-        Order order = record.value();
+        Message<Order> value = record.value();
+        Order order = value.getPayload();
 
         if (isFraud(order)) {
             LOGGER.warn("Order is a fraud!!!");
-            orderDispatcher.send("ECOMMERCE_ORDER_REJECTED", order.getEmail(), order);
+            orderDispatcher.send("ECOMMERCE_ORDER_REJECTED", order.getEmail(), value.getId().continueWith(FraudDetectorService.class.getSimpleName()), order);
         } else {
             LOGGER.info("Aproved: " + order);
-            orderDispatcher.send("ECOMMERCE_ORDER_APROVED", order.getEmail(), order);
+            orderDispatcher.send("ECOMMERCE_ORDER_APROVED", order.getEmail(), value.getId().continueWith(FraudDetectorService.class.getSimpleName()), order);
         }
     }
 
