@@ -18,7 +18,6 @@ public class ReadingReportService {
         try (KafkaService<User> kafkaService = new KafkaService<>(ReadingReportService.class.getSimpleName(),
                 "ECOMMERCE_USER_GENERATE_READING_REPORT",
                 readingReportService::parse,
-                User.class,
                 new HashMap<>())) {
             kafkaService.run();
         }

@@ -15,16 +15,15 @@ public class EmailService {
         try (KafkaService<String> kafkaService = new KafkaService<>(EmailService.class.getSimpleName(),
                 "ECOMMERCE_SEND_EMAIL",
                 emailService::parse,
-                String.class,
                 new HashMap<>())) {
             kafkaService.run();
         }
     }
 
-    private void parse(ConsumerRecord<String, String> consumerRecord) {
+    private void parse(ConsumerRecord<String, Message<String>> consumerRecord) {
         LOGGER.info("Sending email");
         LOGGER.info(consumerRecord.key());
-        LOGGER.info(consumerRecord.value());
+        LOGGER.info(String.valueOf(consumerRecord.value()));
         LOGGER.info(String.valueOf(consumerRecord.partition()));
         LOGGER.info(String.valueOf(consumerRecord.offset()));
 

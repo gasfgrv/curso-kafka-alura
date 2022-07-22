@@ -30,14 +30,14 @@ public class CreateUserService {
         try (KafkaService<Order> kafkaService = new KafkaService<>(CreateUserService .class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
                 createUserService::parse,
-                Order.class,
                 new HashMap<>())) {
             kafkaService.run();
         }
     }
 
-    private void parse(ConsumerRecord<String, Order> record) throws ExecutionException, InterruptedException, SQLException {
-        Order order = record.value();
+    private void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException, SQLException {
+        Message<Order> message = record.value();
+        Order order = message.getPayload();
 
         LOGGER.info("--------------------------------------------");
         LOGGER.info("Processing new order, checking for new user");
