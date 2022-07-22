@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -34,19 +36,28 @@ public class KafkaService<T> implements Closeable {
         this.consumer = new KafkaConsumer<>(getProperties(groupId, properties));
     }
 
-    public void run() {
-        while (true) {
-            ConsumerRecords<String, Message<T>> records = consumer.poll(Duration.ofMillis(100));
+    public void run() throws ExecutionException, InterruptedException {
+        try (KafkaDispatcher<String> deadLetter = new KafkaDispatcher<>()) {
 
-            if (!records.isEmpty()) {
-                LOGGER.warn("Foram encontrados " + records.count() + " registros");
-                records.forEach(consumerRecord -> {
-                    try {
-                        parse.consume(consumerRecord);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            while (true) {
+                ConsumerRecords<String, Message<T>> records = consumer.poll(Duration.ofMillis(100));
+
+                if (!records.isEmpty()) {
+                    LOGGER.warn("Foram encontrados " + records.count() + " registros");
+
+                    for (ConsumerRecord<String, Message<T>> record: records) {
+                        try {
+                            parse.consume(record);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Message<T> message = record.value();
+                            deadLetter.send("ECOMMERCE_DEADLETTER",
+                                    message.getId().toString(),
+                                    message.getId().continueWith("DeadLetter"),
+                                    String.valueOf(new GsonSerializer().serialize("", message)));
+                        }
                     }
-                });
+                }
             }
         }
     }

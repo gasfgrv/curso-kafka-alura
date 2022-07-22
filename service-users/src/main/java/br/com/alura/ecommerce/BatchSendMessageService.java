@@ -25,7 +25,7 @@ public class BatchSendMessageService {
                 "email varchar(200))");
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
         BatchSendMessageService batchSendMessageService = new BatchSendMessageService();
         try (KafkaService<String> kafkaService = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),
                 "ECOMMERCE_SEND_MESSAGE_TO_ALL_USERS",
@@ -46,10 +46,12 @@ public class BatchSendMessageService {
 
 
         for (User user : getAllUsers()) {
-            batchDispatcher.send(message.getPayload(),
+            batchDispatcher.sendAsync(message.getPayload(),
                     user.getUuid(),
                     message.getId().continueWith(BatchSendMessageService.class.getSimpleName()),
                     user);
+
+            LOGGER.info("Sent for " + user.getUuid());
         }
 
     }

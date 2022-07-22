@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,7 @@ public class EmailService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class.getName());
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         EmailService emailService = new EmailService();
         try (KafkaService<String> kafkaService = new KafkaService<>(EmailService.class.getSimpleName(),
                 "ECOMMERCE_SEND_EMAIL",

@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -12,7 +13,7 @@ public class LogService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class.getName());
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         LogService logService = new LogService();
         try (KafkaService<String> kafkaService = new KafkaService<>(LogService.class.getSimpleName(),
                 Pattern.compile("ECOMMERCE.*"),

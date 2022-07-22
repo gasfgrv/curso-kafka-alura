@@ -11,7 +11,7 @@ public class FraudDetectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FraudDetectorService.class.getName());
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         FraudDetectorService fraudDetectorService = new FraudDetectorService();
         try (KafkaService<Order> kafkaService = new KafkaService<>(FraudDetectorService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",

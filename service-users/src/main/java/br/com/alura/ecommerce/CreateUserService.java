@@ -25,7 +25,7 @@ public class CreateUserService {
                 "email varchar(200))");
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
         CreateUserService createUserService = new CreateUserService();
         try (KafkaService<Order> kafkaService = new KafkaService<>(CreateUserService .class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
