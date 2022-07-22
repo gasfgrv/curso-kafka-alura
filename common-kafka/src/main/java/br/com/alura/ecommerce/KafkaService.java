@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class KafkaService<T> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaService.class.getName());
-    private final KafkaConsumer<String, T> consumer;
+    private final KafkaConsumer<String, Message<T>> consumer;
     private final ConsumerFunction parse;
 
     public KafkaService(String groupId, String topic, ConsumerFunction parse, Class<T> type, Map<String, String> properties) {
@@ -36,7 +36,7 @@ public class KafkaService<T> implements Closeable {
 
     public void run() {
         while (true) {
-            ConsumerRecords<String, T> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String, Message<T>> records = consumer.poll(Duration.ofMillis(100));
 
             if (!records.isEmpty()) {
                 LOGGER.warn("Foram encontrados " + records.count() + " registros");

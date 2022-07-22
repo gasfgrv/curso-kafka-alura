@@ -27,11 +27,12 @@ public class ReadingReportService {
 
     private final KafkaDispatcher<User> orderDispatcher = new KafkaDispatcher<>();
 
-    private void parse(ConsumerRecord<String, User> record) throws IOException {
+    private void parse(ConsumerRecord<String, Message<User>> record) throws IOException {
         LOGGER.info("--------------------------------------------");
         LOGGER.info("Processing report for " + record.value());
 
-        User user = record.value();
+        Message<User> message = record.value();
+        User user = message.getPayload();
         File target = new File(user.getReportPath());
         IO.copyTo(SOURCE, target);
         IO.append(target, "Created for " + user.getUuid());
