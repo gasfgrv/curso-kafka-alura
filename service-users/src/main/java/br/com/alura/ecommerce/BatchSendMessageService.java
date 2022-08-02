@@ -1,5 +1,7 @@
 package br.com.alura.ecommerce;
 
+import br.com.alura.ecommerce.consumer.KafkaService;
+import br.com.alura.ecommerce.dispatcher.KafkaDispatcher;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;

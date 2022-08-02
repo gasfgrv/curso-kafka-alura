@@ -1,5 +1,7 @@
-package br.com.alura.ecommerce;
+package br.com.alura.ecommerce.dispatcher;
 
+import br.com.alura.ecommerce.CorrelationId;
+import br.com.alura.ecommerce.Message;
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -36,8 +38,8 @@ public class KafkaDispatcher<T> implements Closeable {
         future.get();
     }
 
-    Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId correlationId, T payload) {
-        Message<T> value = new Message<>(correlationId, payload);
+    public Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId correlationId, T payload) {
+        Message<T> value = new Message<>(correlationId.continueWith("_" + topic), payload);
         ProducerRecord<String, Message<T>> kafkaRecord = new ProducerRecord<>(topic, key, value);
 
         Callback callback = (data, ex) -> {

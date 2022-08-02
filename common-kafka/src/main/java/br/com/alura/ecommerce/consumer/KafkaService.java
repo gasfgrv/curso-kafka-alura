@@ -1,5 +1,8 @@
-package br.com.alura.ecommerce;
+package br.com.alura.ecommerce.consumer;
 
+import br.com.alura.ecommerce.Message;
+import br.com.alura.ecommerce.dispatcher.GsonSerializer;
+import br.com.alura.ecommerce.dispatcher.KafkaDispatcher;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
@@ -21,12 +24,12 @@ public class KafkaService<T> implements Closeable {
     private final KafkaConsumer<String, Message<T>> consumer;
     private final ConsumerFunction parse;
 
-    KafkaService(String groupId, String topic, ConsumerFunction<T> parse, Map<String,String> properties) {
+    public KafkaService(String groupId, String topic, ConsumerFunction<T> parse, Map<String, String> properties) {
         this(parse, groupId, properties);
         consumer.subscribe(Collections.singletonList(topic));
     }
 
-    KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse, Map<String,String> properties) {
+    public KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse, Map<String,String> properties) {
         this(parse, groupId, properties);
         consumer.subscribe(topic);
     }

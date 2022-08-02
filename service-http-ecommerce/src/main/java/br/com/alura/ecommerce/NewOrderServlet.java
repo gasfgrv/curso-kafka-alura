@@ -1,5 +1,6 @@
 package br.com.alura.ecommerce;
 
+import br.com.alura.ecommerce.dispatcher.KafkaDispatcher;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,13 +16,11 @@ import org.slf4j.LoggerFactory;
 public class NewOrderServlet extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(NewOrderServlet.class.getName());
     private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
-    private final KafkaDispatcher<String> emailDispatcher = new KafkaDispatcher<>();
 
     @Override
     public void destroy() {
         super.destroy();
         orderDispatcher.close();
-        emailDispatcher.close();
     }
 
     @Override
@@ -34,9 +33,6 @@ public class NewOrderServlet extends HttpServlet {
 
             Order order = new Order(orderId, amount, email);
             orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, new CorrelationId(NewOrderServlet.class.getSimpleName()), order);
-
-            String emailCode = "Thank you for your order! We are processing your order!";
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, new CorrelationId(NewOrderServlet.class.getSimpleName()),emailCode);
 
             LOGGER.info("New order sent successfully.");
             resp.getWriter().println("New order sent");
