@@ -1,28 +1,29 @@
 package br.com.alura.ecommerce;
 
-import br.com.alura.ecommerce.consumer.KafkaService;
-import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
+import br.com.alura.ecommerce.consumer.ConsumerService;
+import br.com.alura.ecommerce.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmailService {
+public class EmailService implements ConsumerService<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class.getName());
 
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        EmailService emailService = new EmailService();
-        try (KafkaService<String> kafkaService = new KafkaService<>(EmailService.class.getSimpleName(),
-                "ECOMMERCE_SEND_EMAIL",
-                emailService::parse,
-                new HashMap<>())) {
-            kafkaService.run();
-        }
+    public static void main(String[] args) throws Exception {
+        new ServiceRunner(EmailService::new).start(5);
     }
 
-    private void parse(ConsumerRecord<String, Message<String>> consumerRecord) {
+    public String getConsumerGroup() {
+        return EmailService.class.getSimpleName();
+    }
+
+    public String getTopic() {
+        return "ECOMMERCE_SEND_EMAIL";
+    }
+
+    public void parse(ConsumerRecord<String, Message<String>> consumerRecord) {
         LOGGER.info("Sending email");
         LOGGER.info(consumerRecord.key());
         LOGGER.info(String.valueOf(consumerRecord.value()));

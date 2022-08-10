@@ -2,7 +2,6 @@ package br.com.alura.ecommerce;
 
 import br.com.alura.ecommerce.consumer.KafkaService;
 import br.com.alura.ecommerce.dispatcher.KafkaDispatcher;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
