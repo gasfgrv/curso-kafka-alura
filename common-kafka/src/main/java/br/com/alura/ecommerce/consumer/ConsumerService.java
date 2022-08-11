@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public interface ConsumerService<T> {
 
-    void parse(ConsumerRecord<String, Message<T>> consumerRecord) throws IOException, ExecutionException, InterruptedException;
+    void parse(ConsumerRecord<String, Message<T>> consumerRecord) throws Exception;
 
     String getTopic();
 
