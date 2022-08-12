@@ -26,10 +26,10 @@ public class NewOrderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            String orderId = req.getParameter("uuid");
-            BigDecimal amount = new BigDecimal(req.getParameter("amount")).setScale(2, RoundingMode.HALF_UP);
-            String email = req.getParameter("email");
-            Order order = new Order(orderId, amount, email);
+            var orderId = req.getParameter("uuid");
+            var amount = new BigDecimal(req.getParameter("amount")).setScale(2, RoundingMode.HALF_UP);
+            var email = req.getParameter("email");
+            var order = new Order(orderId, amount, email);
 
             try (OrdersDatabase database = new OrdersDatabase()) {
                 if (database.saveNew(order)) {
@@ -51,5 +51,8 @@ public class NewOrderServlet extends HttpServlet {
             Thread.currentThread().interrupt();
             throw new ServletException(e);
         }
+    }
+
+    private void saveNewOrderInDatabase(Order order, OrdersDatabase database) {
     }
 }

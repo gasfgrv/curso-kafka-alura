@@ -15,8 +15,8 @@ public class LogService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class.getName());
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        LogService logService = new LogService();
-        try (KafkaService<String> kafkaService = new KafkaService<>(LogService.class.getSimpleName(),
+        var logService = new LogService();
+        try (var kafkaService = new KafkaService<>(LogService.class.getSimpleName(),
                 Pattern.compile("ECOMMERCE.*"),
                 logService::parse,
                 Map.of(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()))) {
@@ -24,13 +24,13 @@ public class LogService {
         }
     }
 
-    private void parse(ConsumerRecord<String, Message<String>> record) {
+    private void parse(ConsumerRecord<String, Message<String>> consumerRecord) {
         LOGGER.info("------------------------------------------------------");
-        LOGGER.info("Logging: " +  record.topic());
-        LOGGER.info(record.key());
-        LOGGER.info(String.valueOf(record.value()));
-        LOGGER.info(String.valueOf(record.partition()));
-        LOGGER.info(String.valueOf(record.offset()));
+        LOGGER.info("Logging: {}", consumerRecord.topic());
+        LOGGER.info(consumerRecord.key());
+        LOGGER.info(String.valueOf(consumerRecord.value()));
+        LOGGER.info(String.valueOf(consumerRecord.partition()));
+        LOGGER.info(String.valueOf(consumerRecord.offset()));
     }
 
 }

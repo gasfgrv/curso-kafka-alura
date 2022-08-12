@@ -16,25 +16,24 @@ public class ReadingReportService implements ConsumerService<User> {
     public static final Path SOURCE = new File("src/main/resources/report.txt").toPath();
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadingReportService.class.getName());
 
-    private final KafkaDispatcher<User> orderDispatcher = new KafkaDispatcher<>();
 
     public static void main(String[] args) {
-        new ServiceRunner(ReadingReportService::new).start(5);
+        new ServiceRunner<>(ReadingReportService::new).start(5);
     }
 
 
     @Override
-    public void parse(ConsumerRecord<String, Message<User>> record) throws IOException {
+    public void parse(ConsumerRecord<String, Message<User>> consumerRecord) throws IOException {
         LOGGER.info("--------------------------------------------");
-        LOGGER.info("Processing report for " + record.value());
+        LOGGER.info("Processing report for {}", consumerRecord.value());
 
-        Message<User> message = record.value();
+        Message<User> message = consumerRecord.value();
         User user = message.getPayload();
         File target = new File(user.getReportPath());
         IO.copyTo(SOURCE, target);
         IO.append(target, "Created for " + user.getUuid());
 
-        LOGGER.info("File created: " + target.getAbsolutePath());
+        LOGGER.info("File created: {}", target.getAbsolutePath());
     }
 
     @Override

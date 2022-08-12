@@ -5,7 +5,6 @@ import br.com.alura.ecommerce.consumer.ConsumerService;
 import br.com.alura.ecommerce.consumer.ServiceRunner;
 import br.com.alura.ecommerce.dispatcher.KafkaDispatcher;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,8 +19,8 @@ public class FraudDetectorService implements ConsumerService<Order> {
 
     private final LocalDatabase database;
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        new ServiceRunner(FraudDetectorService::new).start(1);
+    public static void main(String[] args) {
+        new ServiceRunner<>(FraudDetectorService::new).start(1);
     }
 
     public FraudDetectorService() throws SQLException {
@@ -32,16 +31,17 @@ public class FraudDetectorService implements ConsumerService<Order> {
     }
 
     @Override
-    public void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException, SQLException {
+    public void parse(ConsumerRecord<String, Message<Order>> consumerRecord) throws ExecutionException, InterruptedException, SQLException {
+        var value = consumerRecord.value();
+
         LOGGER.info("--------------------------------------------");
         LOGGER.info("Processing new order, checking for a fraud");
-        LOGGER.info(record.key());
-        LOGGER.info(String.valueOf(record.value()));
-        LOGGER.info(String.valueOf(record.partition()));
-        LOGGER.info(String.valueOf(record.offset()));
+        LOGGER.info("{}", consumerRecord.key());
+        LOGGER.info("{}", value);
+        LOGGER.info("{}", consumerRecord.partition());
+        LOGGER.info("{}", consumerRecord.offset());
 
-        Message<Order> value = record.value();
-        Order order = value.getPayload();
+        var order = value.getPayload();
 
         if (wasProcessed(order)) {
             LOGGER.info("Order {} was already processed", order.getOrderId());
@@ -54,13 +54,13 @@ public class FraudDetectorService implements ConsumerService<Order> {
             orderDispatcher.send("ECOMMERCE_ORDER_REJECTED", order.getEmail(), value.getId().continueWith(FraudDetectorService.class.getSimpleName()), order);
         } else {
             database.update("insert into Orders (uuid, is_fraud) values (?, false)", order.getOrderId());
-            LOGGER.info("Aproved: " + order);
+            LOGGER.info("Aproved: {}", order);
             orderDispatcher.send("ECOMMERCE_ORDER_APROVED", order.getEmail(), value.getId().continueWith(FraudDetectorService.class.getSimpleName()), order);
         }
     }
 
     private boolean wasProcessed(Order order) throws SQLException {
-        ResultSet results = database.query("select uuid from Orders where uuid = ? limit 1", order.getOrderId());
+        var results = database.query("select uuid from Orders where uuid = ? limit 1", order.getOrderId());
         return results.next();
     }
 

@@ -3,7 +3,6 @@ package br.com.alura.ecommerce;
 import br.com.alura.database.LocalDatabase;
 import br.com.alura.ecommerce.consumer.ConsumerService;
 import br.com.alura.ecommerce.consumer.ServiceRunner;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -17,7 +16,7 @@ public class CreateUserService implements ConsumerService<Order> {
     private final LocalDatabase database;
 
     public static void main(String[] args) {
-        new ServiceRunner(CreateUserService::new).start(1);
+        new ServiceRunner<>(CreateUserService::new).start(1);
     }
 
     public CreateUserService() throws SQLException {
@@ -28,9 +27,9 @@ public class CreateUserService implements ConsumerService<Order> {
     }
 
     @Override
-    public void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
-        Message<Order> message = record.value();
-        Order order = message.getPayload();
+    public void parse(ConsumerRecord<String, Message<Order>> consumerRecord) throws SQLException {
+        var message = consumerRecord.value();
+        var order = message.getPayload();
 
         LOGGER.info("--------------------------------------------");
         LOGGER.info("Processing new order, checking for new user");
@@ -56,7 +55,7 @@ public class CreateUserService implements ConsumerService<Order> {
         String uuid = UUID.randomUUID().toString();
         database.update("insert into Users (uuid, email)" +
                 " values (?, ?)", uuid, email);
-        LOGGER.info("User uuid and " + email + "added");
+        LOGGER.info("User uuid and {} added", email);
     }
 
     private boolean isNewUser(String email) throws SQLException {

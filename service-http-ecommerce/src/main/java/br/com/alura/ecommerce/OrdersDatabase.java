@@ -2,7 +2,6 @@ package br.com.alura.ecommerce;
 
 import br.com.alura.database.LocalDatabase;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class OrdersDatabase implements AutoCloseable {
@@ -24,7 +23,7 @@ public class OrdersDatabase implements AutoCloseable {
     }
 
     private boolean wasProcessed(Order order) throws SQLException {
-        ResultSet results = database.query("select uuid from Orders where uuid = ? limit 1", order.getOrderId());
+        var results = database.query("select uuid from Orders where uuid = ? limit 1", order.getOrderId());
         return results.next();
     }
 

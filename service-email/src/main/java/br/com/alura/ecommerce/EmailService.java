@@ -11,8 +11,8 @@ public class EmailService implements ConsumerService<String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class.getName());
 
 
-    public static void main(String[] args) throws Exception {
-        new ServiceRunner(EmailService::new).start(5);
+    public static void main(String[] args) {
+        new ServiceRunner<>(EmailService::new).start(5);
     }
 
     public String getConsumerGroup() {
@@ -24,11 +24,16 @@ public class EmailService implements ConsumerService<String> {
     }
 
     public void parse(ConsumerRecord<String, Message<String>> consumerRecord) {
+        var key = consumerRecord.key();
+        var value = String.valueOf(consumerRecord.value());
+        var partition = String.valueOf(consumerRecord.partition());
+        var offset = String.valueOf(consumerRecord.offset());
+
         LOGGER.info("Sending email");
-        LOGGER.info(consumerRecord.key());
-        LOGGER.info(String.valueOf(consumerRecord.value()));
-        LOGGER.info(String.valueOf(consumerRecord.partition()));
-        LOGGER.info(String.valueOf(consumerRecord.offset()));
+        LOGGER.info(key);
+        LOGGER.info(value);
+        LOGGER.info(partition);
+        LOGGER.info(offset);
 
         try {
             Thread.sleep(1000);

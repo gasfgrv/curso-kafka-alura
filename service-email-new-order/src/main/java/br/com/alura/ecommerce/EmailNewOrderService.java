@@ -15,21 +15,22 @@ public class EmailNewOrderService implements ConsumerService<Order> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailNewOrderService.class.getName());
 
     public static void main(String[] args) {
-        new ServiceRunner(EmailNewOrderService::new).start(1);
+        new ServiceRunner<>(EmailNewOrderService::new).start(1);
     }
 
     private final KafkaDispatcher<String> emailDispatcher = new KafkaDispatcher<>();
 
     @Override
-    public void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException {
+    public void parse(ConsumerRecord<String, Message<Order>> consumerRecord) throws ExecutionException, InterruptedException {
+        var message = consumerRecord.value();
+
         LOGGER.info("--------------------------------------------");
         LOGGER.info("Processing new order, preparing email");
-        Message<Order> message = record.value();
-        LOGGER.info(String.valueOf(message));
+        LOGGER.info("Message: {}", message);
 
-        String emailCode = "Thank you for your order! We are processing your order!";
-        Order order = message.getPayload();
-        CorrelationId id = message.getId().continueWith(EmailNewOrderService.class.getSimpleName());
+        var emailCode = "Thank you for your order! We are processing your order!";
+        var order = message.getPayload();
+        var id = message.getId().continueWith(EmailNewOrderService.class.getSimpleName());
         emailDispatcher.send("ECOMMERCE_SEND_EMAIL", order.getEmail(), id, emailCode);
     }
 
